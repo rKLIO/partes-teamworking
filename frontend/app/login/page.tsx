@@ -1,15 +1,52 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { authAPI } from "@/src/lib/api";
+
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const tokens = await authAPI.login({ email, password });
+
+      // Stockage des tokens dans des cookies
+      Cookies.set("access_token", tokens.access, { expires: 1/24 }); // 1 heure
+      Cookies.set("refresh_token", tokens.refresh, { expires: 7 });  // 7 jours
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        setError("Email ou mot de passe incorrect.");
+      } else {
+        setError("Une erreur est survenue. Réessayez.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "var(--dark-main)" }}>
-
-      <div className="w-full max-w-md p-8 rounded-2xl"
-        style={{ backgroundColor: "var(--dark-sidebar)" }}>
-
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ backgroundColor: "var(--dark-main)" }}
+    >
+      <div
+        className="w-full max-w-md p-8 rounded-2xl"
+        style={{ backgroundColor: "var(--dark-sidebar)" }}
+      >
         {/* Logo / Titre */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2"
-            style={{ color: "var(--yellow)" }}>
+          <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--yellow)" }}>
             PARTES
           </h1>
           <p className="text-sm" style={{ color: "var(--light-div)" }}>
@@ -17,19 +54,30 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {/* Message d'erreur */}
+        {error && (
+          <div
+            className="px-4 py-3 rounded-lg text-sm mb-5 text-center"
+            style={{ backgroundColor: "var(--orange)", color: "var(--light-main)" }}
+          >
+            {error}
+          </div>
+        )}
+
         {/* Formulaire */}
         <div className="flex flex-col gap-5">
 
           {/* Email */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium"
-              style={{ color: "var(--light-div)" }}>
+            <label className="text-sm font-medium" style={{ color: "var(--light-div)" }}>
               Email
             </label>
             <input
               type="email"
               placeholder="vous@exemple.com"
-              className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-sm outline-none"
               style={{
                 backgroundColor: "var(--dark-main)",
                 color: "var(--light-main)",
@@ -40,41 +88,43 @@ export default function LoginPage() {
 
           {/* Mot de passe */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium"
-              style={{ color: "var(--light-div)" }}>
+            <label className="text-sm font-medium" style={{ color: "var(--light-div)" }}>
               Mot de passe
             </label>
             <input
               type="password"
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-sm outline-none"
               style={{
                 backgroundColor: "var(--dark-main)",
                 color: "var(--light-main)",
                 border: "1px solid var(--dark-sidebar)",
               }}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
 
           {/* Bouton */}
           <button
-            className="w-full py-3 rounded-lg font-semibold text-sm transition-opacity hover:opacity-90 mt-2"
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full py-3 rounded-lg font-semibold text-sm transition-opacity hover:opacity-90 mt-2 disabled:opacity-50"
             style={{
               backgroundColor: "var(--yellow)",
               color: "var(--dark-main)",
-            }}>
-            Se connecter
+            }}
+          >
+            {loading ? "Connexion..." : "Se connecter"}
           </button>
 
         </div>
 
         {/* Lien register */}
-        <p className="text-center text-sm mt-6"
-          style={{ color: "var(--light-div)" }}>
+        <p className="text-center text-sm mt-6" style={{ color: "var(--light-div)" }}>
           Pas encore de compte ?{" "}
-          <a href="/register"
-            className="font-semibold hover:underline"
-            style={{ color: "var(--green)" }}>
+          <a href="/register" className="font-semibold hover:underline" style={{ color: "var(--green)" }}>
             Créer un compte
           </a>
         </p>
