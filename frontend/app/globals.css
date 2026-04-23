@@ -1,4 +1,4 @@
-@import "tailwindcss";
+/*@ import "tailwindcss";
 
 :root {
   --background: #ffffff;
@@ -23,4 +23,31 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+} */
+
+@import "tailwindcss";
+
+:root {
+  /* Charte graphique PARTES */
+  --dark-main: #121212;
+  --dark-sidebar: #282828;
+  --yellow: #FFAE03;
+  --green: #05A8AA;
+  --orange: #F44708;
+  --purple: #944BBB;
+  --light-sidebar: #731DD8;
+  --light-main: #FFFFFF;
+  --light-div: #E5E5E5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--dark-main);
+  color: var(--light-main);
+  font-family: 'Montserrat', sans-serif;
 }
