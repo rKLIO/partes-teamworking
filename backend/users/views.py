@@ -6,11 +6,11 @@ from rest_framework import generics, permissions  # Vues génériques et gestion
 from rest_framework.response import Response  # Permet de retourner des réponses HTTP JSON
 from rest_framework import status  # Codes de statut HTTP (200, 400, etc.)
 from rest_framework.views import APIView  # Classe de base pour créer des vues personnalisées
+from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken  # Gestion des tokens JWT (refresh)
 from rest_framework_simplejwt.exceptions import TokenError  # Gestion des erreurs liées aux tokens
 from .serializers import RegisterSerializer, UserSerializer  # Import des serializers
 from .models import User  # Import du modèle User
-
 
 # Vue pour l'inscription d'un utilisateur
 class RegisterView(generics.CreateAPIView):
@@ -97,7 +97,6 @@ class UserUpdateView(generics.UpdateAPIView):
         
         # Vérifie que l'utilisateur connecté modifie uniquement son propre profil
         if obj != self.request.user:
-            from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Vous ne pouvez modifier que votre propre profil.")
         
         return obj
