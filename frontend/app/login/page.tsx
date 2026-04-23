@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { authAPI } from "@/src/lib/api";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,15 +13,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError("");
     setLoading(true);
-
     try {
-      const tokens = await authAPI.login({ email, password });
-
-      // Stockage des tokens dans des cookies
-      Cookies.set("access_token", tokens.access, { expires: 1/24 }); // 1 heure
-      Cookies.set("refresh_token", tokens.refresh, { expires: 7 });  // 7 jours
-
-      router.push("/dashboard");
+      await login(email, password);
     } catch (err: any) {
       if (err.response?.status === 401) {
         setError("Email ou mot de passe incorrect.");
@@ -44,7 +35,6 @@ export default function LoginPage() {
         className="w-full max-w-md p-8 rounded-2xl"
         style={{ backgroundColor: "var(--dark-sidebar)" }}
       >
-        {/* Logo / Titre */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2" style={{ color: "var(--yellow)" }}>
             PARTES
@@ -54,7 +44,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Message d'erreur */}
         {error && (
           <div
             className="px-4 py-3 rounded-lg text-sm mb-5 text-center"
@@ -64,10 +53,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Formulaire */}
         <div className="flex flex-col gap-5">
-
-          {/* Email */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium" style={{ color: "var(--light-div)" }}>
               Email
@@ -86,7 +72,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Mot de passe */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium" style={{ color: "var(--light-div)" }}>
               Mot de passe
@@ -96,17 +81,16 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               className="w-full px-4 py-3 rounded-lg text-sm outline-none"
               style={{
                 backgroundColor: "var(--dark-main)",
                 color: "var(--light-main)",
                 border: "1px solid var(--dark-sidebar)",
               }}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
 
-          {/* Bouton */}
           <button
             onClick={handleLogin}
             disabled={loading}
@@ -118,17 +102,14 @@ export default function LoginPage() {
           >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
-
         </div>
 
-        {/* Lien register */}
         <p className="text-center text-sm mt-6" style={{ color: "var(--light-div)" }}>
           Pas encore de compte ?{" "}
           <a href="/register" className="font-semibold hover:underline" style={{ color: "var(--green)" }}>
             Créer un compte
           </a>
         </p>
-
       </div>
     </div>
   );
